@@ -44,7 +44,8 @@ def mapped_cities(request):
         'mapeamento__fonte_1',
         'mapeamento__fonte_2',
         'mapeamento__fonte_3',
-        'mapeamento__fonte_4'
+        'mapeamento__fonte_4',
+        'mapeamento__tipo_arquivo'
     ]
     if state:
         state = state.upper()
@@ -61,7 +62,12 @@ def mapped_cities(request):
         total_cities = Municipio.objects.count()
         context = 'Brasil'
 
-    percentage = round(len(cities)/total_cities*100, 2)
+    mapped_cities_count = len(cities)
+    percentage = round(mapped_cities_count/total_cities*100, 2)
+
+    for city in cities:
+        if city['mapeamento__tipo_arquivo']:
+            city['mapeamento__tipo_arquivo'] = Mapeamento.TIPOS_ARQUIVOS[city['mapeamento__tipo_arquivo']][1]
 
     # Pagination on interface
     paginator = Paginator(cities, 50)
@@ -73,11 +79,13 @@ def mapped_cities(request):
     except EmptyPage:
         cities_page = paginator.page(paginator.num_pages)
 
-    return render(request, 'mapped_cities.html', {'cities': cities_page, 'percentage': percentage, 'context': context})
-
+    return render(request, 'mapped_cities.html', {'cities': cities_page, 'percentage': percentage, 'context': context, 'mapped_cities_count': mapped_cities_count })
 
 def about(request):
     return render(request, 'sobre.html')
+
+def faq(request):
+    return render(request, 'faq.html')
 
 
 def download_csv_data(request):
